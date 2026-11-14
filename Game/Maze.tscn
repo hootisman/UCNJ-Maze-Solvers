@@ -79,7 +79,7 @@ script = ExtResource("3_info_panel")
 Maze = NodePath("../MainMaze")
 DimensionsLabel = NodePath("PanelContainer/MarginContainer/ScrollContainer/Content/HBoxContainer/Dimensions")
 AlgorithmLabel = NodePath("PanelContainer/MarginContainer/ScrollContainer/Content/HBoxContainer/Generator")
-SeedLabel = NodePath("PanelContainer/MarginContainer/ScrollContainer/Content/HBoxContainer/Seed")
+SeedLabel = NodePath("PanelContainer/MarginContainer/ScrollContainer/Content/Seed")
 PathLabel = NodePath("PanelContainer/MarginContainer/ScrollContainer/Content/ShowingPathsLabel")
 
 [node name="ControlsHint" type="Label" parent="MazeInfoPanel" unique_id=881025718]
@@ -125,20 +125,10 @@ theme_override_colors/font_color = Color(0.45, 0.95, 0.72, 1)
 theme_override_font_sizes/font_size = 22
 text = "AGENT ALGORITHMS"
 
-[node name="Subtitle" type="Label" parent="MazeInfoPanel/PanelContainer/MarginContainer/ScrollContainer/Content" unique_id=1543749721]
+[node name="Seed" type="Label" parent="MazeInfoPanel/PanelContainer/MarginContainer/ScrollContainer/Content" unique_id=2111139113]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.6, 0.68, 0.79, 1)
-theme_override_font_sizes/font_size = 11
-text = "LIVE SIMULATION DATA"
-
-[node name="MazeSeparator" type="HSeparator" parent="MazeInfoPanel/PanelContainer/MarginContainer/ScrollContainer/Content" unique_id=2001661170]
-layout_mode = 2
-
-[node name="MazeHeading" type="Label" parent="MazeInfoPanel/PanelContainer/MarginContainer/ScrollContainer/Content" unique_id=944151111]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.45, 0.95, 0.72, 1)
-theme_override_font_sizes/font_size = 14
-text = "MAZE"
+theme_override_font_sizes/font_size = 22
+text = "Seed: —"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MazeInfoPanel/PanelContainer/MarginContainer/ScrollContainer/Content" unique_id=1471011383]
 layout_mode = 2
@@ -150,10 +140,6 @@ text = "Dimensions: —"
 [node name="Generator" type="Label" parent="MazeInfoPanel/PanelContainer/MarginContainer/ScrollContainer/Content/HBoxContainer" unique_id=38395202]
 layout_mode = 2
 text = "Generator: —"
-
-[node name="Seed" type="Label" parent="MazeInfoPanel/PanelContainer/MarginContainer/ScrollContainer/Content/HBoxContainer" unique_id=2111139113]
-layout_mode = 2
-text = "Seed: —"
 
 [node name="ShowingPathsLabel" type="Label" parent="MazeInfoPanel/PanelContainer/MarginContainer/ScrollContainer/Content" unique_id=227399955]
 layout_mode = 2

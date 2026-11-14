@@ -35,7 +35,7 @@ public partial class AStarAgent : Node2D
 	//useful for not infinitely dying to a spike or getting infinite points on a coin once you hit the tile once
 	private bool _processedCell = false;
 
-    private int _health = 4;
+    private int _health = 12;
 
     public int health
     {
@@ -239,7 +239,7 @@ public partial class AStarAgent : Node2D
 		public double ElapsedSeconds;
 		public int RemainingHealth;
 		public int CoinsCollected;
-		public int Seed;
+		public ulong Seed;
 		public int ExitCount;
 		public int CoinCount;
 		public int HazardCount;

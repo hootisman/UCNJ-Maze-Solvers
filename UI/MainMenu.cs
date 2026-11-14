@@ -1,5 +1,7 @@
 using Godot;
 using System;
+using System.ComponentModel;
+using System.Reflection.Metadata.Ecma335;
 
 public partial class MainMenu : Control
 {
@@ -27,7 +29,9 @@ public partial class MainMenu : Control
 		Weights GoalWeights,
 		Weights CollectorWeights,
 		Weights CautiousWeights,
-		float SpeedInterval);
+		float SpeedInterval,
+		ulong Seed,
+		bool UseSeed);
 
 	private static SetupSettings _lastSetupSettings;
 	private static bool _returnToSetupOnNextOpen;
@@ -67,6 +71,10 @@ public partial class MainMenu : Control
 	public Control SetupOptions;
 	[Export]
 	public SpinBox SpeedIntervalBox;
+	[Export]
+	public LineEdit SeedLineEdit;
+	[Export]
+	public CheckBox UseSeedCheckBox;
 
 	public override void _Ready()
 	{
@@ -123,8 +131,18 @@ public partial class MainMenu : Control
 		SetupOptions.Hide();
 		MainOptions.Show();
 	}
-
-	//TODO: add buttons for agents
+	public ulong TryGetSeed()
+	{
+		ulong seed;
+		if(!ulong.TryParse(SeedLineEdit.Text, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out seed))
+		{
+			GD.PushWarning("Seed parse failed, generating new seed...");
+			RandomNumberGenerator random = new();
+			random.Randomize();
+			seed = random.Seed;
+		}
+		return seed;
+	}
 	private void OnRunSimulationPressed()
 	{
 		_lastSetupSettings = new SetupSettings(
@@ -141,16 +159,18 @@ public partial class MainMenu : Control
 			Weights.from(GoalSelector),
 			Weights.from(CollectorSelector),
 			Weights.from(CautiousSelector),
-			(float)SpeedIntervalBox.Value);
+			(float)SpeedIntervalBox.Value,
+			TryGetSeed(),
+			UseSeedCheckBox.ButtonPressed);
 
-		Error error = StartSimulation(_lastSetupSettings, 0);
+		Error error = StartSimulation(_lastSetupSettings, _lastSetupSettings.Seed);
 		if (error != Error.Ok)
 		{
 			GD.PushError($"Could not start the simulation: {error}.");
 		}
 	}
 
-	public static Error RestartSimulation(int generationSeed)
+	public static Error RestartSimulation(ulong generationSeed)
 	{
 		if (_lastSetupSettings == null)
 		{
@@ -161,7 +181,7 @@ public partial class MainMenu : Control
 		return StartSimulation(_lastSetupSettings, generationSeed);
 	}
 
-	private static Error StartSimulation(SetupSettings settings, int seed)
+	private static Error StartSimulation(SetupSettings settings, ulong seed)
 	{
 		PackedScene mazeScene = GD.Load<PackedScene>("res://Game/Maze.tscn");
 		if (mazeScene == null)
@@ -176,12 +196,24 @@ public partial class MainMenu : Control
 		int mazeSize = Mathf.RoundToInt((float)settings.MazeSize);
 		maze.MazeWidth = mazeSize;
 		maze.MazeHeight = mazeSize;
-		maze.Seed = seed;
 		maze.ExitCount = (int)settings.ExitCount;
 		maze.SpikeCount = (int)settings.HazardCount;
 		maze.CoinCount = (int)settings.CoinCount;
 		maze.UniqueCollectibles = settings.UniqueCollectibles;
 		maze.UniqueHazards = settings.UniqueHazards;
+		maze.IsUsingCustomSeed = settings.UseSeed;
+		if (maze.IsUsingCustomSeed)
+		{
+			maze.Seed = seed;
+		}
+		else
+		{
+			RandomNumberGenerator random = new();
+			random.Randomize();
+			maze.Seed = random.Seed;
+		}
+
+		GD.Print($"Seed: {maze.Seed}");
 
 		// gameScene.GetNode<DijkstraAgent>("DijkstraAgent").RunInSimulation = settings.Dijkstra;
 		// gameScene.GetNode<AStarAgent>("GoalAgent").RunInSimulation = settings.AStar;
@@ -233,6 +265,8 @@ public partial class MainMenu : Control
 		CollectorSelector.Restore(settings.CollectorWeights);
 		CautiousSelector.Restore(settings.CautiousWeights);
 		SpeedIntervalBox.Value = settings.SpeedInterval;
+		SeedLineEdit.Text = settings.Seed.ToString();
+		UseSeedCheckBox.ButtonPressed = settings.UseSeed;
 	}
 
 	private void OnExitPressed()

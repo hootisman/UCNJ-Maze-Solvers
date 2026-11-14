@@ -27,9 +27,9 @@ public partial class MazeInfoPanel : CanvasLayer
 		//kill me now
 		DimensionsLabel.Text = $"Dimensions: {Maze.GeneratedSize.X} x {Maze.GeneratedSize.Y} cells";
 		AlgorithmLabel.Text = $"Generator: {Maze.ActiveAlgorithm}";
-		SeedLabel.Text = Maze.Seed == 0
-			? $"Seed: Random ({Maze.GenerationSeed})"
-			: $"Seed: {Maze.GenerationSeed}";
+		SeedLabel.Text = Maze.IsUsingCustomSeed
+			? $"Seed: USING CUSTOM ({Maze.Seed})"
+			: $"Seed: {Maze.Seed}";
 		SetStatus(PathLabel, 
 		Maze.IsShowingAgentPaths ? "Showing Agent Paths: TRUE" : "Showing Agent Paths : FALSE", 
 		Maze.IsShowingAgentPaths ? Colors.Green : Colors.Red);

@@ -27,8 +27,9 @@ public partial class Foreground : TileMapLayer
 	[Export]
 	public required TileMapLayer ItemLayer;
 
-	[Export]
-	public int Seed { get; set; }
+	public ulong Seed { get; set; }
+	//true if using Seed variable to generate, false if fully random
+	public bool IsUsingCustomSeed;
 
 	[Export(PropertyHint.Range, "1,20,1")]
 	public int ExitCount { get; set; } = 1;
@@ -39,7 +40,7 @@ public partial class Foreground : TileMapLayer
 	public MazeAlgorithm SelectedAlgorithm { get; set; } = MazeAlgorithm.RandomizedPrim;
 	public string ActiveAlgorithm { get; private set; } = "Not generated";
 	public Vector2I GeneratedSize { get; private set; }
-	public int GenerationSeed { get; private set; }
+	// public int GenerationSeed { get; private set; }
 
 	// Both atlas tiles are in the tileset source with ID 0.
 	// Their atlas coordinates are (1,14) for floor and (1,19) for wall.
@@ -100,16 +101,7 @@ public partial class Foreground : TileMapLayer
 		SpikeCells.Clear();
 		int coins = CoinCount;
 		int spikes = SpikeCount;
-		RandomNumberGenerator random = new();
-		if (Seed == 0)
-		{
-			random.Randomize();
-		}
-		else
-		{
-			random.Seed = (ulong)Seed;
-		}
-
+		RandomNumberGenerator random = RandomFromSeed();
 		for(; coins > 0 ;)
 		{
 			Vector2I potentialCoinCell = new Vector2I(random.RandiRange(1, MazeWidth - 1), random.RandiRange(1,MazeHeight - 1));
@@ -159,7 +151,7 @@ public partial class Foreground : TileMapLayer
 		}
 		else if (keyEvent.Keycode == Key.R)
 		{
-			Error error = MainMenu.RestartSimulation(GenerationSeed);
+			Error error = MainMenu.RestartSimulation(Seed);
 			if (error != Error.Ok)
 			{
 				GD.PushError($"Could not restart the simulation: {error}.");
@@ -200,7 +192,7 @@ public partial class Foreground : TileMapLayer
 		}
 
 		// 2) Resolve one seed for this run so the full maze can be reproduced on restart.
-		RandomNumberGenerator random = CreateGenerationRandom();
+		RandomNumberGenerator random = RandomFromSeed();
 
 		// 3) Start a depth-first search at (1,1). The list acts as a stack of the current route.
 		List<Vector2I> path = new() { new Vector2I(1, 1) };
@@ -262,7 +254,7 @@ public partial class Foreground : TileMapLayer
 		}
 
 		// 2) Resolve one seed for this run so the full maze can be reproduced on restart.
-		RandomNumberGenerator random = CreateGenerationRandom();
+		RandomNumberGenerator random = RandomFromSeed();
 
 		// 3) Start the maze at (1,1). The frontier stores uncarved cells two steps away
 		//    from the currently open maze, and queued prevents adding a cell more than once.
@@ -349,16 +341,8 @@ public partial class Foreground : TileMapLayer
 			}
 		}
 
-		RandomNumberGenerator random = new();
-		if (Seed == 0)
-		{
-			random.Randomize();
-		}
-		else
-		{
-			random.Seed = (ulong)Seed;
-		}
-
+		RandomNumberGenerator random = RandomFromSeed();
+		
 		// 1) Start with a perfect maze.
 		CarveDepthFirst(walls, random);
 
@@ -391,13 +375,59 @@ public partial class Foreground : TileMapLayer
 		ExitCells.Clear();
 		// Open the left entrance and a right-side exit aligned with an inner maze row.
 		walls[StartCell.Y, StartCell.X] = false;
-		int exitY = height % 2 == 0 ? height - 3 : height - 2;
-		walls[exitY, width - 2] = false;
-		walls[exitY, width - 1] = false;
+		// int exitY = height % 2 == 0 ? height - 3 : height - 2;
+		// walls[exitY, width - 2] = false;
+		// walls[exitY, width - 1] = false;
+		int lastX = width % 2 == 0 ? width - 3 : width - 2;
+    	int lastY = height % 2 == 0 ? height - 3 : height - 2;
+
+		List<Vector2I> candidates = new();
+		RandomNumberGenerator random = RandomFromSeed();
+		int ExitsToCreate = 4;
+		// Right edge
+		for (int y = 1; y <= lastY; y += 2)
+		{
+			if (y >= height / 2)
+				candidates.Add(new Vector2I(width - 1, y));
+		}
+
+		// Bottom edge
+		for (int x = 1; x <= lastX; x += 2)
+		{
+			if (x >= width / 2)
+				candidates.Add(new Vector2I(x, height - 1));
+		}
+
+		for (int i = candidates.Count - 1; i > 0; i--)
+		{
+			int j = random.RandiRange(0, i);
+			(candidates[i], candidates[j]) = (candidates[j], candidates[i]);
+		}
+
+		int count = Math.Min(ExitsToCreate, candidates.Count);
+		for (int i = 0; i < count; i++)
+		{
+			Vector2I exit = candidates[i];
+
+			if (exit.X == width - 1)
+			{
+				//Right Edge carve
+				for (int x = lastX + 1; x <= width - 1; x++)
+					walls[exit.Y, x] = false;
+			}
+			else
+			{
+				//Bottom edge carve
+				for (int y = lastY + 1; y <= height - 1; y++)
+					walls[y, exit.X] = false;
+			}
+
+			ExitCells.Add(exit);
+		}
 
 		//record exits 
 		//the x's and y's are reversed which im sure will never be a problem in the future wink face
-		ExitCells.Add(new(width - 1, exitY));
+		// ExitCells.Add(new(width - 1, exitY));
 	}
 
 	private void DrawMaze(bool[,] walls, int width, int height)
@@ -454,24 +484,10 @@ public partial class Foreground : TileMapLayer
 		}
 	}
 
-	private RandomNumberGenerator CreateGenerationRandom()
+	public RandomNumberGenerator RandomFromSeed()
 	{
 		RandomNumberGenerator random = new();
-		if (Seed == 0)
-		{
-			random.Randomize();
-			GenerationSeed = unchecked((int)random.Seed);
-			if (GenerationSeed == 0)
-			{
-				GenerationSeed = 1;
-			}
-		}
-		else
-		{
-			GenerationSeed = Seed;
-		}
-
-		random.Seed = unchecked((ulong)GenerationSeed);
+		random.Seed = Seed;
 		return random;
 	}
 

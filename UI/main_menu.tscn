@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://d3gb052ft4xxu" path="res://UI/MainMenu.cs" id="1_p8ccj"]
 [ext_resource type="PackedScene" uid="uid://rwq4um84fv66" path="res://UI/WeightsUISelector.tscn" id="2_tk8dj"]
 
-[node name="Main menu" type="Control" unique_id=1988938064 node_paths=PackedStringArray("StartSimButton", "ExitButton", "RunSimButton", "MazeAlgorithmOption", "MazeSizeSpinBox", "ExitCountSpinBox", "HazardCountSpinBox", "CoinCountSpinBox", "UniqueCollectiblesCheckBox", "UniqueHazardsCheckBox", "MainOptions", "SetupOptions", "SpeedIntervalBox")]
+[node name="Main menu" type="Control" unique_id=1988938064 node_paths=PackedStringArray("StartSimButton", "ExitButton", "RunSimButton", "MazeAlgorithmOption", "MazeSizeSpinBox", "ExitCountSpinBox", "HazardCountSpinBox", "CoinCountSpinBox", "UniqueCollectiblesCheckBox", "UniqueHazardsCheckBox", "MainOptions", "SetupOptions", "SpeedIntervalBox", "SeedLineEdit", "UseSeedCheckBox")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -24,6 +24,8 @@ UniqueHazardsCheckBox = NodePath("PanelContainer/VBoxContainer/SetupOptions/Uniq
 MainOptions = NodePath("PanelContainer/VBoxContainer/MainOptions")
 SetupOptions = NodePath("PanelContainer/VBoxContainer/SetupOptions")
 SpeedIntervalBox = NodePath("PanelContainer/VBoxContainer/SetupOptions/HBoxContainer/VBoxContainer2/SpeedCount/Count")
+SeedLineEdit = NodePath("PanelContainer/VBoxContainer/SetupOptions/SeedCount/Count")
+UseSeedCheckBox = NodePath("PanelContainer/VBoxContainer/SetupOptions/HBoxContainer/VBoxContainer2/BoxContainer/UseSeed")
 
 [node name="ColorRect" type="ColorRect" parent="." unique_id=1410634130]
 layout_mode = 1
@@ -91,16 +93,20 @@ alignment = 1
 layout_mode = 2
 AgentName = "Goal"
 DefaultFloorWeight = 15.0
+DefaultHazardWeight = 30.0
 
 [node name="CollectorAgentWeights" parent="PanelContainer/VBoxContainer/SetupOptions/Weights" unique_id=355424128 instance=ExtResource("2_tk8dj")]
 layout_mode = 2
 AgentName = "Collector"
-DefaultCoinWeight = 0.1
+DefaultCoinWeight = 1.0
+DefaultFloorWeight = 15.0
+DefaultHazardWeight = 30.0
 
 [node name="CautiousAgentWeights" parent="PanelContainer/VBoxContainer/SetupOptions/Weights" unique_id=1750274636 instance=ExtResource("2_tk8dj")]
 layout_mode = 2
 AgentName = "Cautious"
-DefaultHazardWeight = 160.0
+DefaultFloorWeight = 15.0
+DefaultHazardWeight = 500.0
 
 [node name="GeneratorSettingsLabel" type="Label" parent="PanelContainer/VBoxContainer/SetupOptions" unique_id=499887130]
 layout_mode = 2
@@ -125,6 +131,18 @@ text = "Maze generation algorithm:"
 [node name="MazeAlgorithm" type="OptionButton" parent="PanelContainer/VBoxContainer/SetupOptions" unique_id=366758429]
 layout_mode = 2
 
+[node name="SeedCount" type="HBoxContainer" parent="PanelContainer/VBoxContainer/SetupOptions" unique_id=1639945265]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/SetupOptions/SeedCount" unique_id=418396443]
+layout_mode = 2
+text = "Seed:"
+
+[node name="Count" type="LineEdit" parent="PanelContainer/VBoxContainer/SetupOptions/SeedCount" unique_id=1945782218]
+layout_mode = 2
+size_flags_horizontal = 3
+
 [node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/SetupOptions" unique_id=904210122]
 layout_mode = 2
 
@@ -147,18 +165,13 @@ max_value = 1.0
 step = 0.01
 value = 0.12
 
-[node name="SeedCount" type="HBoxContainer" parent="PanelContainer/VBoxContainer/SetupOptions/HBoxContainer/VBoxContainer2" unique_id=1639945265]
+[node name="BoxContainer" type="BoxContainer" parent="PanelContainer/VBoxContainer/SetupOptions/HBoxContainer/VBoxContainer2" unique_id=1119722860]
 layout_mode = 2
 alignment = 1
 
-[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/SetupOptions/HBoxContainer/VBoxContainer2/SeedCount" unique_id=418396443]
+[node name="UseSeed" type="CheckBox" parent="PanelContainer/VBoxContainer/SetupOptions/HBoxContainer/VBoxContainer2/BoxContainer" unique_id=661753963]
 layout_mode = 2
-text = "Seed:"
-
-[node name="Count" type="SpinBox" parent="PanelContainer/VBoxContainer/SetupOptions/HBoxContainer/VBoxContainer2/SeedCount" unique_id=1489907924]
-custom_minimum_size = Vector2(90, 0)
-layout_mode = 2
-allow_greater = true
+text = "Use Custom Seed?"
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer/SetupOptions/HBoxContainer" unique_id=2137945375]
 layout_mode = 2
@@ -189,6 +202,7 @@ text = "Hazard count:"
 [node name="Count" type="SpinBox" parent="PanelContainer/VBoxContainer/SetupOptions/HBoxContainer/VBoxContainer/HazardCount" unique_id=1436804555]
 custom_minimum_size = Vector2(90, 0)
 layout_mode = 2
+max_value = 300.0
 value = 10.0
 
 [node name="CoinCount" type="HBoxContainer" parent="PanelContainer/VBoxContainer/SetupOptions/HBoxContainer/VBoxContainer" unique_id=1824224209]
@@ -202,6 +216,7 @@ text = "Coin count:"
 [node name="Count" type="SpinBox" parent="PanelContainer/VBoxContainer/SetupOptions/HBoxContainer/VBoxContainer/CoinCount" unique_id=306621702]
 custom_minimum_size = Vector2(90, 0)
 layout_mode = 2
+max_value = 300.0
 value = 10.0
 
 [node name="UniqueCollectibles" type="CheckBox" parent="PanelContainer/VBoxContainer/SetupOptions" unique_id=1613456386]
