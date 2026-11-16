@@ -26,6 +26,7 @@ public enum SettingKey
 	TrialMode,
 	TrialCount,
 	UseSpeedInterval,
+	HealthCount,
 }
 
 //all settings in a wrapper class

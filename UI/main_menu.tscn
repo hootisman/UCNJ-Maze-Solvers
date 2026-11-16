@@ -107,19 +107,36 @@ layout_mode = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer" unique_id=904210122]
 layout_mode = 2
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="VBoxContainer3" type="HBoxContainer" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer" unique_id=1856880653]
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="MazeSizeLabel" type="Label" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer/VBoxContainer3" unique_id=1201329109]
+layout_mode = 2
+text = "Maze size (even):"
+
+[node name="MazeSize" type="SpinBox" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer/VBoxContainer3" unique_id=607846077]
+layout_mode = 2
+min_value = 6.0
+step = 2.0
+value = 32.0
+script = ExtResource("3_f40uw")
+Key = 1
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer" unique_id=227218827]
 layout_mode = 2
 
-[node name="UseSpeed" type="CheckBox" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer/VBoxContainer2" unique_id=1209855730]
-layout_mode = 2
-text = "Use Speed Interval?"
-script = ExtResource("5_ev3b6")
-Key = 14
-
 [node name="SpeedCount" type="HBoxContainer" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer/VBoxContainer2" unique_id=1095019963]
 layout_mode = 2
 alignment = 1
+
+[node name="UseSpeed" type="CheckBox" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer/VBoxContainer2/SpeedCount" unique_id=1209855730]
+layout_mode = 2
+script = ExtResource("5_ev3b6")
+Key = 14
 
 [node name="Label" type="Label" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer/VBoxContainer2/SpeedCount" unique_id=1633319626]
 layout_mode = 2
@@ -135,39 +152,19 @@ value = 0.01
 script = ExtResource("3_f40uw")
 Key = 5
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer" unique_id=2137945375]
-layout_mode = 2
-
-[node name="VBoxContainer3" type="VBoxContainer" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer" unique_id=441347081]
-layout_mode = 2
-
-[node name="MazeSizeLabel" type="Label" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer/VBoxContainer3" unique_id=1201329109]
-layout_mode = 2
-text = "Maze size (even):"
-
-[node name="MazeSize" type="SpinBox" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer/VBoxContainer3" unique_id=607846077]
-custom_minimum_size = Vector2(120, 0)
-layout_mode = 2
-min_value = 6.0
-step = 2.0
-value = 32.0
-script = ExtResource("3_f40uw")
-Key = 1
-
 [node name="VBoxContainer4" type="VBoxContainer" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer" unique_id=1516944412]
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="HazardDepend" type="CheckBox" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer/VBoxContainer4" unique_id=1881657978]
-layout_mode = 2
-button_pressed = true
-text = "Trial Mode"
-script = ExtResource("5_ev3b6")
-Key = 12
-
 [node name="TrialCount" type="HBoxContainer" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer/VBoxContainer4" unique_id=406720146]
 layout_mode = 2
 alignment = 1
+
+[node name="HazardDepend" type="CheckBox" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer/VBoxContainer4/TrialCount" unique_id=1881657978]
+layout_mode = 2
+button_pressed = true
+script = ExtResource("5_ev3b6")
+Key = 12
 
 [node name="Label" type="Label" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer/VBoxContainer4/TrialCount" unique_id=1811531081]
 layout_mode = 2
@@ -189,16 +186,15 @@ layout_mode = 2
 layout_mode = 2
 alignment = 1
 
-[node name="UseSeed" type="CheckBox" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer2/BoxContainer" unique_id=661753963]
-layout_mode = 2
-text = "Use Custom Seed?"
-script = ExtResource("5_ev3b6")
-Key = 6
-
 [node name="SeedCount" type="HBoxContainer" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer2" unique_id=1639945265]
 layout_mode = 2
 size_flags_horizontal = 3
 alignment = 1
+
+[node name="UseSeed" type="CheckBox" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer2/SeedCount" unique_id=661753963]
+layout_mode = 2
+script = ExtResource("5_ev3b6")
+Key = 6
 
 [node name="Label" type="Label" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer2/SeedCount" unique_id=418396443]
 layout_mode = 2
@@ -212,6 +208,8 @@ Key = 7
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer" unique_id=1800498548]
 layout_mode = 2
+theme_override_constants/separation = 11
+alignment = 1
 
 [node name="CustomCountsBox" type="CheckBox" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer3" unique_id=1052136318]
 layout_mode = 2
@@ -226,7 +224,7 @@ alignment = 1
 
 [node name="Label" type="Label" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer3/ExitCount" unique_id=1290568651]
 layout_mode = 2
-text = "Exit count:"
+text = "Exits:"
 
 [node name="Count" type="SpinBox" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer3/ExitCount" unique_id=19638250]
 custom_minimum_size = Vector2(90, 0)
@@ -243,7 +241,7 @@ alignment = 1
 
 [node name="Label" type="Label" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer3/HazardCount" unique_id=111527373]
 layout_mode = 2
-text = "Hazard count:"
+text = "Hazards:"
 
 [node name="Count" type="SpinBox" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer3/HazardCount" unique_id=1184080518]
 custom_minimum_size = Vector2(90, 0)
@@ -259,7 +257,7 @@ alignment = 1
 
 [node name="Label" type="Label" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer3/CoinCount" unique_id=1388439486]
 layout_mode = 2
-text = "Coin count:"
+text = "Coins:"
 
 [node name="Count" type="SpinBox" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer3/CoinCount" unique_id=1439593007]
 custom_minimum_size = Vector2(90, 0)
@@ -268,6 +266,27 @@ max_value = 300.0
 value = 10.0
 script = ExtResource("3_f40uw")
 Key = 4
+
+[node name="HBoxContainer4" type="HBoxContainer" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer" unique_id=968574599]
+layout_mode = 2
+theme_override_constants/separation = 11
+alignment = 1
+
+[node name="HealthCount" type="HBoxContainer" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer4" unique_id=540549656]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer4/HealthCount" unique_id=85680758]
+layout_mode = 2
+text = "Health:"
+
+[node name="Count" type="SpinBox" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer4/HealthCount" unique_id=1568780551]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+max_value = 300.0
+value = 6.0
+script = ExtResource("3_f40uw")
+Key = 15
 
 [node name="RunSimulation" type="Button" parent="PanelContainer/VBoxContainer/SetupOptions" unique_id=1368964411]
 layout_mode = 2

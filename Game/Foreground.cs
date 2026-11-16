@@ -84,8 +84,8 @@ public partial class Foreground : TileMapLayer
 	public bool isFloor(Vector2I cell) => GetCellAtlasCoords(cell) == FloorAtlasCell;
 	public bool isWall(Vector2I cell) => GetCellAtlasCoords(cell) == WallAtlasCell;
 
-	public bool IsShowingAgentPaths = true;
-	public bool IsShowingAgentGrids = false;
+	public static bool IsShowingAgentPaths = true;
+	public static bool IsShowingAgentGrids = false;
 
 	public override void _Ready()
 	{

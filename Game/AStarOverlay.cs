@@ -84,7 +84,7 @@ public partial class AStarOverlay : Node2D
 	{
         
 		// if (Grid == null) return;
-        if(Grid != null && Maze.IsShowingAgentGrids)
+        if(Grid != null && Foreground.IsShowingAgentGrids)
         {
             Vector2 tileSize = Maze.TileSet.TileSize;
             Rect2I region = Grid.Region;
@@ -102,7 +102,7 @@ public partial class AStarOverlay : Node2D
         }
 
 		// if(Path == null) return;
-        if(Path != null && Maze.IsShowingAgentPaths){
+        if(Path != null && Foreground.IsShowingAgentPaths){
             Vector2 tileSize = Maze.TileSet.TileSize;
             Array<Vector2> pathPoints = new();
             foreach(Vector2I tile in Path)

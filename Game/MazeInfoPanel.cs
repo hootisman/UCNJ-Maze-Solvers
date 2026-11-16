@@ -31,8 +31,8 @@ public partial class MazeInfoPanel : CanvasLayer
 			? $"Seed: USING CUSTOM ({Maze.Seed})"
 			: $"Seed: {Maze.Seed}";
 		SetStatus(PathLabel, 
-		Maze.IsShowingAgentPaths ? "Showing Agent Paths: TRUE" : "Showing Agent Paths : FALSE", 
-		Maze.IsShowingAgentPaths ? Colors.Green : Colors.Red);
+		Foreground.IsShowingAgentPaths ? "Showing Agent Paths: TRUE" : "Showing Agent Paths : FALSE", 
+		Foreground.IsShowingAgentPaths ? Colors.Green : Colors.Red);
 	}
 
 	private static void SetStatus(Label label, string text, Color color)
