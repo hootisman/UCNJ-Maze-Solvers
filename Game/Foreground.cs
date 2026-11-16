@@ -30,6 +30,11 @@ public partial class Foreground : TileMapLayer
 	public ulong Seed { get; set; }
 	//true if using Seed variable to generate, false if fully random
 	public bool IsUsingCustomSeed;
+	//true if on experiement/trial mode
+	public bool IsOnTrialMode;
+
+	public int TrialCount;
+	public static int CurrentTrial= 1;
 
 	[Export(PropertyHint.Range, "1,20,1")]
 	public int ExitCount { get; set; } = 1;
@@ -67,6 +72,8 @@ public partial class Foreground : TileMapLayer
 	[Export]
 	public int SpikeCount = 20;
 
+	private int _finishedAgents;
+
 	private static readonly Vector2I[] Directions =
 	{
 		new(0, -1),
@@ -87,11 +94,11 @@ public partial class Foreground : TileMapLayer
 
 		GenerateBraided();
 		InitItemLayer();
-		
 
 		// _aOverlay.QueueRedraw();	//must call this after building grid/weight change/finding path
 		foreach(AStarAgent agent in Agents)
 		{
+			agent.RunEnded += OnAgentRunEnded;
 			agent.AStarAlgo.QueueRedraw();
 		}
 	}
@@ -383,7 +390,6 @@ public partial class Foreground : TileMapLayer
 
 		List<Vector2I> candidates = new();
 		RandomNumberGenerator random = RandomFromSeed();
-		int ExitsToCreate = 4;
 		// Right edge
 		for (int y = 1; y <= lastY; y += 2)
 		{
@@ -404,7 +410,7 @@ public partial class Foreground : TileMapLayer
 			(candidates[i], candidates[j]) = (candidates[j], candidates[i]);
 		}
 
-		int count = Math.Min(ExitsToCreate, candidates.Count);
+		int count = Math.Min(ExitCount, candidates.Count);
 		for (int i = 0; i < count; i++)
 		{
 			Vector2I exit = candidates[i];
@@ -481,6 +487,38 @@ public partial class Foreground : TileMapLayer
 			walls[between.Y, between.X] = false;
 			walls[chosen.Y, chosen.X] = false;
 			path.Add(chosen);
+		}
+	}
+
+
+
+	private void OnAgentRunEnded(AStarAgent agent)
+	{
+		_finishedAgents++;
+		if (_finishedAgents < Agents.Length) return;
+
+		GD.Print($"completed (trial {CurrentTrial}/{TrialCount})");
+
+		if (!IsOnTrialMode) return;
+
+		if (CurrentTrial >= TrialCount)
+		{
+			GD.Print($"All {TrialCount} trials finished.");
+			return;   //doesnt start any more trials
+		}
+
+		CurrentTrial++;
+		CallDeferred(MethodName.StartNextTrial);
+	}
+
+	private void StartNextTrial()
+	{
+		RandomNumberGenerator random = new();
+		random.Randomize();
+		Error error = MainMenu.RestartSimulation(random.Seed);
+		if (error != Error.Ok)
+		{
+			GD.PushError($"Could not start trial {CurrentTrial}: {error}.");
 		}
 	}
 

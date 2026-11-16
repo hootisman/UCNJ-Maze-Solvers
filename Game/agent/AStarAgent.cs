@@ -7,6 +7,8 @@ public partial class AStarAgent : Node2D
 	private bool _isMoving;
 	private float _moveProgress;
 
+	// private const float MinSecondsPerCell = 0.0001f;
+
 	[Export(PropertyHint.Range, "0.03,1.0,0.01")]
 	public float SecondsPerCell { get; set; } = 0.12f;
 
@@ -53,6 +55,8 @@ public partial class AStarAgent : Node2D
     public HealthBar healthBar;
 
 	
+	[Signal]
+	public delegate void RunEndedEventHandler(AStarAgent agent);
 
 	public override void _Ready()
 	{
@@ -83,10 +87,13 @@ public partial class AStarAgent : Node2D
 	//run whenever run ends, whether agent dies, completes maze, or whatever.
 	public void EndRun()
 	{
+		if(!IsRunning) return;
+
+
 		GD.Print($"{AgentType} agent has ended run! logging data");
 		IsRunning = false;
 		CsvLogger.Append("user://results.csv", packData());
-
+		EmitSignal(SignalName.RunEnded, this);
 	}
 
     //recalcs path, call this if weight or tiles change
