@@ -7,9 +7,10 @@ public partial class AStarAgent : Node2D
 	private bool _isMoving;
 	private float _moveProgress;
 
-	// private const float MinSecondsPerCell = 0.0001f;
+	public const float MinSecondsPerCell = 0.0001f;
 
-	[Export(PropertyHint.Range, "0.03,1.0,0.01")]
+	// [Export(PropertyHint.Range, "0.03,1.0,0.01")]
+	[Export(PropertyHint.Range, "0.0001,1.0,0.0001")]
 	public float SecondsPerCell { get; set; } = 0.12f;
 
 	[Export]
@@ -130,7 +131,22 @@ public partial class AStarAgent : Node2D
 		{
 			return;
 		}
+		//move plz
+		_moveProgress += (float)delta / Mathf.Max(SecondsPerCell, MinSecondsPerCell);
 
+		while (_moveProgress >= 1.0f && _isMoving)
+		{
+			float leftover = _moveProgress - 1.0f;
+			if (!ArriveAtNextCell()) return;   // run ended
+			_moveProgress += leftover;         // StepAlongPath reset it to 0
+		}
+
+		if (_isMoving)
+		{
+			//thx
+			GlobalPosition = _moveStart.Lerp(_moveEnd, _moveProgress);
+		}
+/*
 		_moveProgress += (float)delta / Mathf.Max(SecondsPerCell, 0.03f);
 		if (_moveProgress >= 1.0f)
 		{
@@ -172,6 +188,40 @@ public partial class AStarAgent : Node2D
 		}
 
 		GlobalPosition = _moveStart.Lerp(_moveEnd, _moveProgress);
+		*/
+
+	}
+	//called when agent arrives to new cell
+	private bool ArriveAtNextCell()
+	{
+		PathIndex++;
+		CurrentCell = Path[PathIndex];
+		StepsTaken++;
+		GlobalPosition = _moveEnd;
+		_isMoving = false;
+		QueueRedraw();
+
+		if (Maze.CoinCells.Contains(CurrentCell))
+		{
+			CoinsCollected += 1;
+			Replan();
+		}
+		if (Maze.SpikeCells.Contains(CurrentCell))
+		{
+			health -= 1;
+			Replan();
+			if (!IsRunning) return false;   // died
+		}
+
+		if (CurrentCell == Maze.ExitCells[0])
+		{
+			ReachedExit = true;
+			EndRun();
+			return false;
+		}
+
+		StepAlongPath();
+		return IsRunning;   // StepAlongPath can end the run on error
 	}
 
 	public override void _Draw()

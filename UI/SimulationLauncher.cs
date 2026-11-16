@@ -71,7 +71,7 @@ public static class SimulationLauncher
 		{
 			AStarAgent agent = gameScene.GetNode<AStarAgent>(nodeName);
 			agent.SetWeights(MainMenu.Weights.FromVector(s.Get<Vector3>(weightsKey)));
-			agent.SecondsPerCell = speed;
+			agent.SecondsPerCell = s.Get<bool>(SettingKey.UseSpeedInterval) ? speed : AStarAgent.MinSecondsPerCell;
 		}
 	}
 

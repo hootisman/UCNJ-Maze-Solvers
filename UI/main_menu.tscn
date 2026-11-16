@@ -111,6 +111,12 @@ layout_mode = 2
 [node name="VBoxContainer2" type="VBoxContainer" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer" unique_id=227218827]
 layout_mode = 2
 
+[node name="UseSpeed" type="CheckBox" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer/VBoxContainer2" unique_id=1209855730]
+layout_mode = 2
+text = "Use Speed Interval?"
+script = ExtResource("5_ev3b6")
+Key = 14
+
 [node name="SpeedCount" type="HBoxContainer" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer/VBoxContainer2" unique_id=1095019963]
 layout_mode = 2
 alignment = 1

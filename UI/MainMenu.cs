@@ -46,6 +46,7 @@ public partial class MainMenu : Control
 	private void OnRunSimulationPressed()
 	{
 		SimulationSettings.Last = SettingsBinder.Collect(SetupOptions);
+		Foreground.CurrentTrial = 1;	//resets 
 
 		Error error = SimulationLauncher.Start(SimulationSettings.Last);
 		if (error != Error.Ok)

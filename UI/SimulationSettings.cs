@@ -25,6 +25,7 @@ public enum SettingKey
 	CustomCounts,
 	TrialMode,
 	TrialCount,
+	UseSpeedInterval,
 }
 
 //all settings in a wrapper class
