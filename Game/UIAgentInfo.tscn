@@ -4,10 +4,11 @@
 [ext_resource type="Texture2D" uid="uid://dvu328ah8j7q0" path="res://resources/temp_health.tres" id="2_7klhv"]
 [ext_resource type="Script" uid="uid://bfuvnmr6vif55" path="res://UI/HealthBar.cs" id="3_ia0so"]
 
-[node name="GoalAgentInfo" type="VBoxContainer" unique_id=1478419050 node_paths=PackedStringArray("Name", "Health", "Status", "Position", "Steps", "WeightScore", "GameScore", "Coins", "Elapsed", "CoinW", "FloorW", "HazardW", "Interval")]
+[node name="GoalAgentInfo" type="VBoxContainer" unique_id=1478419050 node_paths=PackedStringArray("Name", "Health", "HealthTextLabel", "Status", "Position", "Steps", "WeightScore", "GameScore", "Coins", "Elapsed", "CoinW", "FloorW", "HazardW", "Interval")]
 script = ExtResource("1_wuf5v")
 Name = NodePath("HBoxContainer/NameHeading")
 Health = NodePath("HealthBar")
+HealthTextLabel = NodePath("HealthBar/HealthLabel")
 Status = NodePath("HBox1/AStarStatus")
 Position = NodePath("HBox1/AStarPosition")
 Steps = NodePath("HBox1/AStarSteps")
@@ -46,11 +47,48 @@ value = 4.0
 texture_progress = ExtResource("2_7klhv")
 script = ExtResource("3_ia0so")
 
+[node name="HealthLabel" type="Label" parent="HealthBar" unique_id=1895384452]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -21.0
+offset_right = 20.0
+offset_bottom = 21.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_font_sizes/font_size = 30
+text = "0"
+horizontal_alignment = 1
+
 [node name="AStarLegend" type="Label" parent="." unique_id=1228693661]
 visible = false
 layout_mode = 2
 theme_override_colors/font_color = Color(0.72, 0.77, 0.86, 1)
 text = "Cyan: explored  |  Pink: frontier  |  Yellow: least-cost path"
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="." unique_id=1705836189]
+layout_mode = 2
+
+[node name="AStarCoinW" type="Label" parent="HBoxContainer3" unique_id=806514970]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 0, 1)
+text = "Coin W: 0"
+
+[node name="AStarFloorW" type="Label" parent="HBoxContainer3" unique_id=1569524345]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5416738, 0.9249178, 0.33391464, 1)
+text = "Floor W: 0"
+
+[node name="AStarHazardW" type="Label" parent="HBoxContainer3" unique_id=1190436802]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9999998, 0.15604696, 0.23932177, 1)
+text = "Hazard W: 0"
 
 [node name="HBox1" type="HBoxContainer" parent="." unique_id=1388207585]
 layout_mode = 2
@@ -92,24 +130,3 @@ text = "Step interval: —"
 [node name="AStarElapsed" type="Label" parent="HBoxContainer4" unique_id=1497366114]
 layout_mode = 2
 text = "Elapsed: —"
-
-[node name="HBoxContainer3" type="HBoxContainer" parent="." unique_id=1705836189]
-layout_mode = 2
-
-[node name="AStarCoinW" type="Label" parent="HBoxContainer3" unique_id=806514970]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 0, 1)
-theme_override_font_sizes/font_size = 12
-text = "Coin W: 0"
-
-[node name="AStarFloorW" type="Label" parent="HBoxContainer3" unique_id=1569524345]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.5416738, 0.9249178, 0.33391464, 1)
-theme_override_font_sizes/font_size = 12
-text = "Floor W: 0"
-
-[node name="AStarHazardW" type="Label" parent="HBoxContainer3" unique_id=1190436802]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.9999998, 0.15604696, 0.23932177, 1)
-theme_override_font_sizes/font_size = 12
-text = "Hazard W: 0"

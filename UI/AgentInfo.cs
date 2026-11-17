@@ -12,6 +12,8 @@ public partial class AgentInfo : VBoxContainer
     [Export]
     public HealthBar Health;
     [Export]
+    public Label HealthTextLabel;
+    [Export]
     public Label Status;
     [Export]
     public Label Position;
@@ -58,6 +60,7 @@ public partial class AgentInfo : VBoxContainer
 		// 	$"Least-cost route: {Agent.RouteCost} cost, {Agent.PathLength} cells";
 		// _aStarExploredLabel.Text = $"Cells explored: {Agent.CellsExplored}";
 		Interval.Text = $"Step interval: {Agent.SecondsPerCell:0.00} s / cell";
+        HealthTextLabel.Text = $"{Agent.health}";
 
         if (Agent.ReachedExit)
         {
