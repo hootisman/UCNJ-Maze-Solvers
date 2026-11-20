@@ -59,7 +59,7 @@ public static class SimulationLauncher
 		maze.Seed = maze.IsUsingCustomSeed
 			? seedOverride ?? ParseSeedOrRandom(s.Get<string>(SettingKey.Seed, ""))
 			: RandomSeed();
-
+		maze.FloorDensity = (float)s.Get<double>(SettingKey.FloorDensityCount);
 		GD.Print($"Seed: {maze.Seed}");
 	}
 

@@ -27,6 +27,7 @@ public enum SettingKey
 	TrialCount,
 	UseSpeedInterval,
 	HealthCount,
+	FloorDensityCount,
 }
 
 //all settings in a wrapper class

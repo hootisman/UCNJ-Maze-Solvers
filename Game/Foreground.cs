@@ -87,12 +87,31 @@ public partial class Foreground : TileMapLayer
 	public static bool IsShowingAgentPaths = true;
 	public static bool IsShowingAgentGrids = false;
 
+	/* Floor count-based maze algo variables */
+	// [Export(PropertyHint.Range, "1,10000,1")]
+	// public int FloorTileTarget { get; set; } = 400;
+
+	public float FloorDensity = 0.45f;
+
+	public int FloorTileTarget => Mathf.RoundToInt(MazeWidth * MazeHeight * FloorDensity);
+	[Export(PropertyHint.Range, "0,1,0.01")]
+	public float WindingBias { get; set; } = 0.5f;
+	[Export(PropertyHint.Range, "0,1,0.01")]
+	public float LoopChance { get; set; } = 0.1f;
+	[Export(PropertyHint.Range, "0,1,0.01")]
+	public float OpenChance { get; set; } = 0.05f;
+
+	public int ActualFloorCount { get; private set; }
+
+	private const float PathWiggle = 4f;   // randomness of the start-to-exit paths
+
 	public override void _Ready()
 	{
 		// GeneratePrim();
 		
 
-		GenerateBraided();
+		// GenerateBraided();
+		GenerateMaze();
 		InitItemLayer();
 
 		// _aOverlay.QueueRedraw();	//must call this after building grid/weight change/finding path
@@ -513,8 +532,11 @@ public partial class Foreground : TileMapLayer
 
 	private void StartNextTrial()
 	{
+
 		RandomNumberGenerator random = new();
-		random.Randomize();
+		if (IsUsingCustomSeed) random.Seed = Seed; else random.Randomize();
+		
+		// random.Randomize();
 		Error error = MainMenu.RestartSimulation(random.Seed);
 		if (error != Error.Ok)
 		{
@@ -539,6 +561,256 @@ public partial class Foreground : TileMapLayer
 				func.Invoke(x,y);
 			}
 		}
+	}
+
+	public void GenerateMaze()
+	{
+		GeneratedSize = new Vector2I(MazeWidth, MazeHeight);
+		RandomNumberGenerator random = RandomFromSeed();
+
+		bool[,] floor = new bool[MazeHeight, MazeWidth];   // [y, x], true = floor
+		int count = 0;
+		void Carve(Vector2I c)
+		{
+			if (!floor[c.Y, c.X]) { floor[c.Y, c.X] = true; count++; }
+		}
+
+		// 1) Start tile and the tile just inside it.
+		Carve(StartCell);
+		Carve(StartCell + Vector2I.Right);
+
+		// 2) Pick exits on the right/bottom edges (edge tile + the tile just inside it).
+		List<(Vector2I Edge, Vector2I Inner)> candidates = new();
+		for (int y = 1; y <= MazeHeight - 2; y++)
+			if (y >= MazeHeight / 2) candidates.Add((new(MazeWidth - 1, y), new(MazeWidth - 2, y)));
+		for (int x = 1; x <= MazeWidth - 2; x++)
+			if (x >= MazeWidth / 2) candidates.Add((new(x, MazeHeight - 1), new(x, MazeHeight - 2)));
+
+		for (int i = candidates.Count - 1; i > 0; i--)
+		{
+			int j = random.RandiRange(0, i);
+			(candidates[i], candidates[j]) = (candidates[j], candidates[i]);
+		}
+
+		ExitCells.Clear();
+		List<Vector2I> exitInners = new();
+		foreach (var (edge, inner) in candidates)
+		{
+			if (exitInners.Count >= ExitCount) break;
+			bool tooClose = false;
+			foreach (Vector2I existing in ExitCells)
+				if (Mathf.Abs(existing.X - edge.X) + Mathf.Abs(existing.Y - edge.Y) < 3) tooClose = true;
+			if (tooClose) continue;
+
+			Carve(edge);
+			Carve(inner);
+			ExitCells.Add(edge);
+			exitInners.Add(inner);
+		}
+
+		// Clamp the target to what the grid can physically hold.
+		int maxFloor = (MazeWidth - 2) * (MazeHeight - 2) + 1 + ExitCells.Count;
+		int target = Mathf.Min(FloorTileTarget, maxFloor);
+		if (target < FloorTileTarget)
+			GD.PushWarning($"FloorTileTarget {FloorTileTarget} exceeds capacity {maxFloor}; using {target}.");
+
+		// 3) Connect every exit to the start with a winding path.
+		foreach (Vector2I inner in exitInners)
+		{
+			bool[,] connected = FloodFrom(floor, StartCell);
+			if (connected[inner.Y, inner.X]) continue;
+			foreach (Vector2I tile in FindWindingPath(floor, connected, inner, random))
+				Carve(tile);
+		}
+
+		if (count > target)
+			GD.PushWarning($"Start-to-exit paths need {count} tiles but target is {target}. Raise the target.");
+
+		// 4) Grow outward until the count is exact (growing-tree with staged rule relaxation).
+		List<Vector2I> active = new();
+		void Refill()
+		{
+			active.Clear();
+			for (int y = 0; y < MazeHeight; y++)
+				for (int x = 0; x < MazeWidth; x++)
+					if (floor[y, x]) active.Add(new Vector2I(x, y));
+		}
+
+		int stage = 0;
+		Refill();
+		while (count < target)
+		{
+			if (active.Count == 0)
+			{
+				if (stage >= 2) break;   // grid is full
+				stage++;
+				Refill();
+				continue;
+			}
+
+			int index = random.Randf() < WindingBias ? active.Count - 1 : random.RandiRange(0, active.Count - 1);
+			if (TryPickCandidate(floor, active[index], stage, random, out Vector2I picked))
+			{
+				Carve(picked);
+				active.Add(picked);
+			}
+			else
+			{
+				active.RemoveAt(index);
+			}
+		}
+
+		ActualFloorCount = count;
+		if (count != FloorTileTarget)
+			GD.PushWarning($"Floor tiles: wanted {FloorTileTarget}, generated {count}.");
+
+		bool[,] walls = new bool[MazeHeight, MazeWidth];
+		for (int y = 0; y < MazeHeight; y++)
+			for (int x = 0; x < MazeWidth; x++)
+				walls[y, x] = !floor[y, x];
+
+		DrawMaze(walls, MazeWidth, MazeHeight);
+	}
+
+
+	private bool TryPickCandidate(bool[,] floor, Vector2I cell, int stage, RandomNumberGenerator random, out Vector2I picked)
+	{
+		List<Vector2I> valid = new(4);
+		foreach (Vector2I direction in Directions)
+		{
+			Vector2I c = cell + direction;
+			if (!InInterior(c) || floor[c.Y, c.X]) continue;
+
+			int neighbors = FloorNeighborCount(floor, c);
+			bool ok;
+			if (stage == 2 || neighbors <= 1)
+			{
+				ok = true;   // plain extension of a corridor
+			}
+			else
+			{
+				bool makesBlock = WouldMake2x2(floor, c);
+				ok = stage == 0
+					? random.Randf() < (makesBlock ? OpenChance : LoopChance)
+					: !makesBlock;
+			}
+			if (ok) valid.Add(c);
+		}
+
+		picked = valid.Count > 0 ? valid[random.RandiRange(0, valid.Count - 1)] : default;
+		return valid.Count > 0;
+	}
+
+	private List<Vector2I> FindWindingPath(bool[,] floor, bool[,] connected, Vector2I target, RandomNumberGenerator random)
+	{
+		// Dijkstra from every connected tile at once, with random tile costs so paths wander.
+		float[,] dist = new float[MazeHeight, MazeWidth];
+		Vector2I[,] prev = new Vector2I[MazeHeight, MazeWidth];
+		PriorityQueue<Vector2I, float> queue = new();
+
+		for (int y = 0; y < MazeHeight; y++)
+		{
+			for (int x = 0; x < MazeWidth; x++)
+			{
+				dist[y, x] = float.PositiveInfinity;
+				if (connected[y, x])
+				{
+					dist[y, x] = 0;
+					queue.Enqueue(new Vector2I(x, y), 0);
+				}
+			}
+		}
+
+		while (queue.TryDequeue(out Vector2I current, out float priority))
+		{
+			if (priority > dist[current.Y, current.X]) continue;
+			if (current == target) break;
+
+			foreach (Vector2I direction in Directions)
+			{
+				Vector2I next = current + direction;
+				if (!InInterior(next)) continue;
+
+				// Random cost plus a penalty for hugging existing floor, so paths don't form blobs.
+				float cost = 1f + random.Randf() * PathWiggle + 2f * FloorNeighborCount(floor, next);
+				float newDist = dist[current.Y, current.X] + cost;
+				if (newDist < dist[next.Y, next.X])
+				{
+					dist[next.Y, next.X] = newDist;
+					prev[next.Y, next.X] = current;
+					queue.Enqueue(next, newDist);
+				}
+			}
+		}
+
+		List<Vector2I> path = new();
+		if (float.IsPositiveInfinity(dist[target.Y, target.X])) return path;
+
+		Vector2I step = target;
+		while (!connected[step.Y, step.X])
+		{
+			path.Add(step);
+			step = prev[step.Y, step.X];
+		}
+		return path;
+	}
+
+	private bool[,] FloodFrom(bool[,] floor, Vector2I start)
+	{
+		bool[,] seen = new bool[MazeHeight, MazeWidth];
+		Queue<Vector2I> queue = new();
+		seen[start.Y, start.X] = true;
+		queue.Enqueue(start);
+		while (queue.Count > 0)
+		{
+			Vector2I current = queue.Dequeue();
+			foreach (Vector2I direction in Directions)
+			{
+				Vector2I next = current + direction;
+				if (IsFloorAt(floor, next) && !seen[next.Y, next.X])
+				{
+					seen[next.Y, next.X] = true;
+					queue.Enqueue(next);
+				}
+			}
+		}
+		return seen;
+	}
+
+	private bool InInterior(Vector2I c) =>
+		c.X >= 1 && c.X <= MazeWidth - 2 && c.Y >= 1 && c.Y <= MazeHeight - 2;
+
+	private bool IsFloorAt(bool[,] floor, Vector2I p) =>
+		p.X >= 0 && p.X < MazeWidth && p.Y >= 0 && p.Y < MazeHeight && floor[p.Y, p.X];
+
+	private int FloorNeighborCount(bool[,] floor, Vector2I c)
+	{
+		int n = 0;
+		foreach (Vector2I direction in Directions)
+			if (IsFloorAt(floor, c + direction)) n++;
+		return n;
+	}
+
+	// True if making c floor would complete a 2x2 block of floor.
+	private bool WouldMake2x2(bool[,] floor, Vector2I c)
+	{
+		for (int sx = -1; sx <= 0; sx++)
+		{
+			for (int sy = -1; sy <= 0; sy++)
+			{
+				bool allFloor = true;
+				for (int dx = 0; dx <= 1 && allFloor; dx++)
+				{
+					for (int dy = 0; dy <= 1; dy++)
+					{
+						Vector2I p = new(c.X + sx + dx, c.Y + sy + dy);
+						if (p != c && !IsFloorAt(floor, p)) { allFloor = false; break; }
+					}
+				}
+				if (allFloor) return true;
+			}
+		}
+		return false;
 	}
 
 }

@@ -173,7 +173,7 @@ text = "Trial count:"
 [node name="Count" type="SpinBox" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer/VBoxContainer4/TrialCount" unique_id=990226640]
 custom_minimum_size = Vector2(90, 0)
 layout_mode = 2
-min_value = 100.0
+min_value = 1.0
 max_value = 1000.0
 value = 100.0
 script = ExtResource("3_f40uw")
@@ -231,7 +231,7 @@ custom_minimum_size = Vector2(90, 0)
 layout_mode = 2
 min_value = 1.0
 max_value = 20.0
-value = 1.0
+value = 4.0
 script = ExtResource("3_f40uw")
 Key = 2
 
@@ -287,6 +287,24 @@ max_value = 300.0
 value = 6.0
 script = ExtResource("3_f40uw")
 Key = 15
+
+[node name="FloorCount" type="HBoxContainer" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer4" unique_id=947276906]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer4/FloorCount" unique_id=514680465]
+layout_mode = 2
+text = "Floor Density"
+
+[node name="Count" type="SpinBox" parent="PanelContainer/VBoxContainer/SetupOptions/VBoxContainer/HBoxContainer4/FloorCount" unique_id=1502657791]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+min_value = 0.05
+max_value = 1.0
+step = 0.01
+value = 0.45
+script = ExtResource("3_f40uw")
+Key = 16
 
 [node name="RunSimulation" type="Button" parent="PanelContainer/VBoxContainer/SetupOptions" unique_id=1368964411]
 layout_mode = 2

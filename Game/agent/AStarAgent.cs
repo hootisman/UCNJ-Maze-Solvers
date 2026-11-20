@@ -6,6 +6,7 @@ public partial class AStarAgent : Node2D
 	private Vector2 _moveEnd;
 	private bool _isMoving;
 	private float _moveProgress;
+    public Vector2I TargetExit { get; private set; }   // exit the current path is heading to
 
 	public const float MinSecondsPerCell = 0.0001f;
 
@@ -100,22 +101,18 @@ public partial class AStarAgent : Node2D
     //recalcs path, call this if weight or tiles change
 	public bool Replan()
 	{
-        //TODO: if adding more exit cells, iterate throught them all
-		Path = AStarAlgo.GeneratePath(CurrentCell, Maze.ExitCells[0]);
-		PathIndex = 0; // _path[0] is the cell we're standing on
+		Path = AStarAlgo.FindBestPath(CurrentCell, out Vector2I exit);
+		PathIndex = 0;   // Path[0] is the cell we're standing on
+		TargetExit = exit;
 
-		if (AStarAlgo != null)
-		{
-			AStarAlgo.Path = Path;
-			AStarAlgo.QueueRedraw();
-		}
+		AStarAlgo.Path = Path;
+		AStarAlgo.QueueRedraw();
 
 		if (Path.Count == 0)
 		{
-			GD.PushWarning($"{nameof(AStarAgent)} found no path from {CurrentCell} to {Maze.ExitCells[0]}.");
+			GD.PushWarning($"{nameof(AStarAgent)} found no path from {CurrentCell} to any exit.");
 			return false;
 		}
-
 		return true;
 	}
 
@@ -213,7 +210,8 @@ public partial class AStarAgent : Node2D
 			if (!IsRunning) return false;   // died
 		}
 
-		if (CurrentCell == Maze.ExitCells[0])
+		// if (CurrentCell == Maze.ExitCells[0])
+		if (CurrentCell == TargetExit)
 		{
 			ReachedExit = true;
 			EndRun();
@@ -283,6 +281,7 @@ public partial class AStarAgent : Node2D
 			ExitCount = Maze.ExitCells.Count,
 			CoinCount = Maze.CoinCells.Count,
 			HazardCount = Maze.SpikeCells.Count,
+			FloorCount = Maze.ActualFloorCount,
 		};
 	}
 
@@ -300,5 +299,6 @@ public partial class AStarAgent : Node2D
 		public int ExitCount;
 		public int CoinCount;
 		public int HazardCount;
+		public int FloorCount;
 	}
 }

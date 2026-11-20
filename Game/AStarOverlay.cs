@@ -75,7 +75,7 @@ public partial class AStarOverlay : Node2D
 
         UpdateAllWeights();
 
-        Path = GeneratePath(Maze.StartCell, Maze.ExitCells[0]);
+        // Path = GeneratePath(Maze.StartCell, Maze.ExitCells[0]);
 
         QueueRedraw();
     }
@@ -102,7 +102,7 @@ public partial class AStarOverlay : Node2D
         }
 
 		// if(Path == null) return;
-        if(Path != null && Foreground.IsShowingAgentPaths){
+        if(Path != null && Path.Count >= 2 && Foreground.IsShowingAgentPaths){
             Vector2 tileSize = Maze.TileSet.TileSize;
             Array<Vector2> pathPoints = new();
             foreach(Vector2I tile in Path)
@@ -185,5 +185,46 @@ public partial class AStarOverlay : Node2D
         float max_t = Math.Max(MaxWeight - 1.0f, 0.00001f);
         float t = Math.Clamp((weight - 1.0f) / max_t, 0f, 1.0f);
         return FloorColor.Lerp(HeavyColor, t);
+    }
+
+    //returns total weight and game score if agent followed path. does not ACTUALLY follow path
+    public (float Weight, float GameScore) ScorePath(Array<Vector2I> path)
+    {
+        float weight = 0f;
+        float gameScore = 0f;
+        for (int i = 1; i < path.Count; i++)
+        {
+            weight += Grid.GetPointWeightScale(path[i]);
+            gameScore += GetGameScoreAt(path[i]);
+        }
+        return (weight, gameScore);
+    }
+
+    //paths to every exit, then returns the best exit to path to
+    //returns empty array if no path available
+    public Array<Vector2I> FindBestPath(Vector2I from, out Vector2I bestExit)
+    {
+        Array<Vector2I> best = new();
+        bestExit = from;
+        float bestWeight = float.PositiveInfinity;
+        float bestScore = float.NegativeInfinity;
+
+        foreach (Vector2I exit in Maze.ExitCells)
+        {
+            Array<Vector2I> candidate = GeneratePath(from, exit);
+            if (candidate.Count == 0) continue;   // unreachable
+
+            var (weight, score) = ScorePath(candidate);
+            bool better = weight < bestWeight
+                || (Mathf.IsEqualApprox(weight, bestWeight) && score > bestScore);
+            if (better)
+            {
+                best = candidate;
+                bestExit = exit;
+                bestWeight = weight;
+                bestScore = score;
+            }
+        }
+        return best;
     }
 }
